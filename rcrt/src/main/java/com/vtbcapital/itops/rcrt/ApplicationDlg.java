@@ -2,6 +2,7 @@ package com.vtbcapital.itops.rcrt;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -12,31 +13,35 @@ import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
+import javax.swing.JTabbedPane;
+import javax.swing.UIManager;
+
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.JCheckBox;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ApplicationDlg extends JDialog {
-
-	private final JPanel contentPanel = new JPanel();
-	private JTable table;
 	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JPasswordField passwordField;
-	private JTable table_1;
-	private JTextField textField_4;
-	private JTextField textField_5;
+	private JTable table;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			ApplicationDlg dialog = new ApplicationDlg();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 	}
 
 	/**
@@ -45,112 +50,112 @@ public class ApplicationDlg extends JDialog {
 	public ApplicationDlg() {
 		setTitle("Applications settings");
 		setBounds(100, 100, 623, 589);
-		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		contentPanel.setLayout(null);
-		
-		table_1 = new JTable();
-		table_1.setBounds(433, 384, 141, -121);
-		contentPanel.add(table_1);
+		getContentPane().setLayout(null);
+		{
+			JPanel buttonPane = new JPanel();
+			buttonPane.setBounds(0, 518, 607, 33);
+			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+			getContentPane().add(buttonPane);
+			{
+				JButton okButton = new JButton("OK");
+				okButton.setActionCommand("OK");
+				buttonPane.add(okButton);
+				getRootPane().setDefaultButton(okButton);
+			}
+			{
+				JButton cancelButton = new JButton("Cancel");
+				cancelButton.setActionCommand("Cancel");
+				buttonPane.add(cancelButton);
+			}
+		}
 		
 		JLabel lblApplication = new JLabel("Application");
-		lblApplication.setBounds(10, 11, 65, 14);
-		contentPanel.add(lblApplication);
+		lblApplication.setBounds(10, 11, 123, 14);
+		getContentPane().add(lblApplication);
 		
 		JComboBox comboBox = new JComboBox();
-		comboBox.setBounds(73, 8, 209, 20);
-		contentPanel.add(comboBox);
+		comboBox.setBounds(76, 8, 199, 20);
+		getContentPane().add(comboBox);
 		
 		JButton btnAdd = new JButton("Add");
-		btnAdd.setBounds(292, 7, 89, 23);
-		contentPanel.add(btnAdd);
+
+		btnAdd.setBounds(285, 7, 89, 23);
+		getContentPane().add(btnAdd);
 		
-		JButton btnRemove = new JButton("Remove");
-		btnRemove.setBounds(386, 7, 89, 23);
-		contentPanel.add(btnRemove);
+		JButton btnDelete = new JButton("Delete");
+		btnDelete.setBounds(384, 7, 89, 23);
+		getContentPane().add(btnDelete);
 		
-		JLabel lblApprovers = new JLabel("Approvers");
-		lblApprovers.setBounds(10, 123, 81, 14);
-		contentPanel.add(lblApprovers);
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBounds(10, 36, 587, 475);
+		getContentPane().add(tabbedPane);
+		
+		JPanel panelCommon = new JPanel();
+		tabbedPane.addTab("Common", null, panelCommon, null);
+		panelCommon.setLayout(null);
+		
+		JLabel lblNextRecertificationDate = new JLabel("Next re-certification date:");
+		lblNextRecertificationDate.setBounds(10, 37, 233, 14);
+		panelCommon.add(lblNextRecertificationDate);
+		
+
+		
+		
+		JLabel lblIntervalBetweenRecertifications = new JLabel("Interval between re-certifications (in months):");
+		lblIntervalBetweenRecertifications.setBounds(10, 65, 233, 14);
+		panelCommon.add(lblIntervalBetweenRecertifications);
+		
+		
+		UtilDateModel model = new UtilDateModel();
+		Properties p = new Properties();
+		p.put("text.today", "Today");
+		p.put("text.month", "Month");
+		p.put("text.year", "Year");
+		JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
+		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+		datePicker.setBounds(253, 28, 164, 23);
+		
+				
+		panelCommon.add(datePicker);
+		
+		JSpinner spinner = new JSpinner();
+		spinner.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(1)));
+		spinner.setBounds(253, 62, 47, 20);
+		panelCommon.add(spinner);
+		
+		JCheckBox chckbxActive = new JCheckBox("Active");
+		chckbxActive.setSelected(true);
+		chckbxActive.setBounds(6, 7, 97, 23);
+		panelCommon.add(chckbxActive);
+		
+		JPanel panelApprovers = new JPanel();
+		tabbedPane.addTab("Approvers", null, panelApprovers, null);
+		panelApprovers.setLayout(null);
 		
 		table = new JTable();
-		table.setBounds(10, 148, 464, 84);
-		contentPanel.add(table);
+		table.setBounds(10, 11, 562, 197);
+		panelApprovers.add(table);
 		
 		JButton btnAdd_1 = new JButton("Add");
-		btnAdd_1.setBounds(73, 119, 89, 23);
-		contentPanel.add(btnAdd_1);
+		btnAdd_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				UserPicker up = new UserPicker();
+				Users selectedUser = up.showDialog();
+				if (selectedUser != null) {
+					System.out.println(selectedUser);
+				} else {
+					System.out.println("null");
+				}
+			}
+		});
+		btnAdd_1.setBounds(10, 219, 89, 23);
+		panelApprovers.add(btnAdd_1);
 		
-		JButton btnRemove_1 = new JButton("Remove");
-		btnRemove_1.setBounds(172, 119, 89, 23);
-		contentPanel.add(btnRemove_1);
+		JButton btnDelete_1 = new JButton("Delete");
+		btnDelete_1.setBounds(109, 219, 89, 23);
+		panelApprovers.add(btnDelete_1);
+
 		
-		JLabel lblSqlScript = new JLabel("SQL Script:");
-		lblSqlScript.setBounds(10, 243, 81, 14);
-		contentPanel.add(lblSqlScript);
-		
-		textField = new JTextField();
-		textField.setBounds(10, 262, 371, 68);
-		contentPanel.add(textField);
-		textField.setColumns(10);
-		
-		JLabel lblServer = new JLabel("Server:");
-		lblServer.setBounds(10, 341, 46, 14);
-		contentPanel.add(lblServer);
-		
-		textField_1 = new JTextField();
-		textField_1.setBounds(73, 338, 121, 20);
-		contentPanel.add(textField_1);
-		textField_1.setColumns(10);
-		
-		JLabel lblDatabase = new JLabel("Database:");
-		lblDatabase.setBounds(10, 371, 65, 14);
-		contentPanel.add(lblDatabase);
-		
-		textField_2 = new JTextField();
-		textField_2.setBounds(73, 368, 121, 20);
-		contentPanel.add(textField_2);
-		textField_2.setColumns(10);
-		
-		JLabel lblUser = new JLabel("User:");
-		lblUser.setBounds(212, 344, 46, 14);
-		contentPanel.add(lblUser);
-		
-		JLabel lblPassword = new JLabel("Password:");
-		lblPassword.setBounds(212, 370, 65, 14);
-		contentPanel.add(lblPassword);
-		
-		textField_3 = new JTextField();
-		textField_3.setBounds(275, 341, 118, 20);
-		contentPanel.add(textField_3);
-		textField_3.setColumns(10);
-		
-		passwordField = new JPasswordField();
-		passwordField.setBounds(275, 367, 121, 20);
-		contentPanel.add(passwordField);
-		
-		JLabel lblAdditionalColumns = new JLabel("Additional columns:");
-		lblAdditionalColumns.setBounds(423, 243, 118, 14);
-		contentPanel.add(lblAdditionalColumns);
-		
-		JLabel lblNextRecertificationDate = new JLabel("Next recertification date:");
-		lblNextRecertificationDate.setBounds(10, 47, 147, 14);
-		contentPanel.add(lblNextRecertificationDate);
-		
-		textField_4 = new JTextField();
-		textField_4.setBounds(196, 44, 86, 20);
-		contentPanel.add(textField_4);
-		textField_4.setColumns(10);
-		
-		JLabel lblIntervalBetweenRecertifications = new JLabel("Interval between recertifications:");
-		lblIntervalBetweenRecertifications.setBounds(10, 73, 184, 14);
-		contentPanel.add(lblIntervalBetweenRecertifications);
-		
-		textField_5 = new JTextField();
-		textField_5.setBounds(196, 70, 86, 20);
-		contentPanel.add(textField_5);
-		textField_5.setColumns(10);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));

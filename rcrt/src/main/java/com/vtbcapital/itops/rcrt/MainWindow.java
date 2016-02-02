@@ -7,6 +7,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+
+
 public class MainWindow {
 
 	private JFrame frmRecertificationTool;
@@ -51,6 +53,8 @@ public class MainWindow {
 		
 		JMenuItem mntmApplications = new JMenuItem("Applications");
 		mnReferences.add(mntmApplications);
+		
+		
 	}
 
 }
