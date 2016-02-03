@@ -7,6 +7,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 import javax.swing.JLabel;
@@ -23,6 +24,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
 import javax.swing.ListSelectionModel;
 
 public class UserPicker extends JDialog {
@@ -30,6 +32,7 @@ public class UserPicker extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private JTextField tfFilter;
 	private JTable table;
+	private UsersTableModel model;
 	private TableRowSorter<UsersTableModel> sorter;
 	
 	private Users result;
@@ -107,7 +110,7 @@ public class UserPicker extends JDialog {
 					UsersDlg ud = new UsersDlg(null);
 					Users newUser = ud.showDialog();
 					if (newUser != null) {
-						System.out.println(newUser.getName());
+						addNewUser(newUser);
 					}
 				}
 			});
@@ -118,7 +121,10 @@ public class UserPicker extends JDialog {
 						Users user = ((UsersTableModel)table.getModel()).get(table.convertRowIndexToModel(table.getSelectedRow()));
 						if (user != null) {
 							UsersDlg ud = new UsersDlg(user);
-							ud.showDialog();
+							Users edited = ud.showDialog();
+							if (edited != null) {
+								editUser(edited);
+							}
 						}
 						
 					}
@@ -149,7 +155,7 @@ public class UserPicker extends JDialog {
 		contentPanel.add(scrollPane, gbc_scrollPane);
 		
 		
-		UsersTableModel model = new UsersTableModel();
+		model = new UsersTableModel();
 		table = new JTable(model);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
@@ -210,6 +216,22 @@ public class UserPicker extends JDialog {
 		}
 		
 		sorter.setRowFilter(rf);
+	}
+	
+	private void addNewUser(Users user) {
+		model.add(user);
+		model.fireTableDataChanged();
+		
+		int numberOfRows = model.getRowCount();
+		int lastRow = table.convertRowIndexToView(numberOfRows - 1);
+		table.changeSelection(lastRow, 0, false, false);
+	}
+	
+	private void editUser(Users user) {
+		int selected = table.getSelectedRow();
+		model.add(user);
+		model.fireTableDataChanged();	
+		table.changeSelection(selected, 0, false, false);
 	}
 	
 	public Users showDialog() {

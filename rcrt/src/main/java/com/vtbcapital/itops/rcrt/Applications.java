@@ -1,5 +1,6 @@
 package com.vtbcapital.itops.rcrt;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +12,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+
+
 
 @Entity(name="Applications")
 public class Applications {
@@ -86,6 +93,25 @@ public class Applications {
 
 	public void setApprovers(Set<Approvers> approvers) {
 		this.approvers = approvers;
+	}
+	
+	
+	public String toString() {
+		return getName();
+	}
+	
+	public static ArrayList<Applications> getApplications() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		
+		Query q = session.createQuery("from Applications");
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<Applications> result = new ArrayList<Applications>(q.list());
+		
+		session.close();
+
+		return result;
+		
 	}
 	
 	

@@ -1,5 +1,8 @@
 package com.vtbcapital.itops.rcrt;
 
+import java.util.Date;
+
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -38,6 +41,18 @@ public class HibernateUtil {
     public static void shutdown() {
         // Close caches and connection pools
         getSessionFactory().close();
+    }
+    
+    public static boolean saveElement(Object object) {
+		Session session = getSessionFactory().openSession();
+		  
+        session.beginTransaction();
+ 
+        session.saveOrUpdate(object);
+ 
+        session.getTransaction().commit(); 
+        
+        return true;
     }
 
 }

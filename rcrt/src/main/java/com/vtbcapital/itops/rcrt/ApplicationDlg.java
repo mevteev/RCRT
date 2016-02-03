@@ -2,12 +2,15 @@ package com.vtbcapital.itops.rcrt;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
@@ -16,12 +19,16 @@ import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
+
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JCheckBox;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -73,9 +80,12 @@ public class ApplicationDlg extends JDialog {
 		lblApplication.setBounds(10, 11, 123, 14);
 		getContentPane().add(lblApplication);
 		
-		JComboBox comboBox = new JComboBox();
+		JComboBox<Applications> comboBox = new JComboBox<Applications>();
 		comboBox.setBounds(76, 8, 199, 20);
 		getContentPane().add(comboBox);
+		
+		
+		comboBox.setModel(new DefaultComboBoxModel(Applications.getApplications().toArray()));
 		
 		JButton btnAdd = new JButton("Add");
 
@@ -173,4 +183,5 @@ public class ApplicationDlg extends JDialog {
 			}
 		}
 	}
+	
 }

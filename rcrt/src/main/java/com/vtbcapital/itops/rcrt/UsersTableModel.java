@@ -23,13 +23,9 @@ public class UsersTableModel extends AbstractTableModel {
 	@SuppressWarnings("unchecked")
 	public UsersTableModel() {
 		super();
-		Session session = HibernateUtil.getSessionFactory().openSession();
 		
-		Query q = session.createQuery("from Users");
-		
-		UsersList = new ArrayList<Users>(q.list());
-		
-		session.close();
+		reloadData();
+
 	}
 	
 	@Override
@@ -64,6 +60,22 @@ public class UsersTableModel extends AbstractTableModel {
 			return UsersList.get(index); 
 		}
 		else return null;
+	}
+	
+	private void reloadData() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		
+		Query q = session.createQuery("from Users");
+		
+		UsersList = new ArrayList<Users>(q.list());
+		
+		session.close();		
+	}
+	
+	public void add(Users user) {
+		HibernateUtil.saveElement(user);	
+		
+		reloadData();
 	}
 
 }
