@@ -19,6 +19,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
@@ -49,6 +50,19 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JTextArea;
 
+import java.awt.Font;
+
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import org.jdesktop.beansbinding.BeanProperty;
+import org.jdesktop.beansbinding.AutoBinding;
+import org.jdesktop.beansbinding.Bindings;
+import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
+import org.jdesktop.beansbinding.ObjectProperty;
+
 public class ApplicationDlg extends JDialog {
 	private JTextField textField;
 	private JTable table;
@@ -56,6 +70,36 @@ public class ApplicationDlg extends JDialog {
 	private JTextField tfDatabase;
 	private JTextField tfUser;
 	private JPasswordField pfPassword;
+	
+	private JSpinner spInterval;
+	private UtilDateModel dateModel;
+	private JComboBox<Applications> cbApplication;
+	private JTextArea taNotes;
+	final private JTextArea taStatement;
+	
+	DefaultComboBoxModel<Applications> applicationModel;
+	
+	private boolean isModified;
+	
+	private Applications currentApp;
+	
+	
+	private DocumentListener documentListener = new DocumentListener() {
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+        	isModified = true;
+        }
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+        	isModified = true;
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent arg0) {
+        	isModified = true;
+        }			
+	};
 
 	/**
 	 * Launch the application.
@@ -101,12 +145,24 @@ public class ApplicationDlg extends JDialog {
 		lblApplication.setBounds(10, 11, 123, 14);
 		getContentPane().add(lblApplication);
 		
-		JComboBox<Applications> comboBox = new JComboBox<Applications>();
-		comboBox.setBounds(76, 8, 199, 20);
-		getContentPane().add(comboBox);
+		cbApplication = new JComboBox<Applications>();
+		cbApplication.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (isModified) {
+					if (JOptionPane.showConfirmDialog(null, "Data was changed. Do you want to save?", "Data was changed", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						saveChanges();
+					}
+				}
+				currentApp = (Applications) cbApplication.getSelectedItem();
+				fillFormData((Applications)cbApplication.getSelectedItem());
+			}
+		});
+		cbApplication.setBounds(76, 8, 199, 20);
+		getContentPane().add(cbApplication);
 		
 		
-		comboBox.setModel(new DefaultComboBoxModel(Applications.getApplications().toArray()));
+		applicationModel = new DefaultComboBoxModel(Applications.getApplications().toArray());
+		cbApplication.setModel(applicationModel);
 		
 		JButton btnAdd = new JButton("Add");
 
@@ -121,43 +177,109 @@ public class ApplicationDlg extends JDialog {
 		tabbedPane.setBounds(10, 36, 587, 475);
 		getContentPane().add(tabbedPane);
 		
+		dateModel = new UtilDateModel();
+		Properties p = new Properties();
+		p.put("text.today", "Today");
+		p.put("text.month", "Month");
+		p.put("text.year", "Year");
+		JDatePanelImpl datePanel = new JDatePanelImpl(dateModel, p);
+		
 		JPanel panelCommon = new JPanel();
 		tabbedPane.addTab("Common", null, panelCommon, null);
-		panelCommon.setLayout(null);
+		GridBagLayout gbl_panelCommon = new GridBagLayout();
+		gbl_panelCommon.columnWidths = new int[]{0, 245, 120, 164, 0};
+		gbl_panelCommon.rowHeights = new int[]{23, 14, 20, 0, 0, 0};
+		gbl_panelCommon.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panelCommon.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		panelCommon.setLayout(gbl_panelCommon);
+		
+
+		
+		
+		JCheckBox chckbxActive = new JCheckBox("Active");
+		chckbxActive.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				isModified = true;
+			}
+		});
+		chckbxActive.setSelected(true);
+		GridBagConstraints gbc_chckbxActive = new GridBagConstraints();
+		gbc_chckbxActive.anchor = GridBagConstraints.NORTHWEST;
+		gbc_chckbxActive.insets = new Insets(0, 0, 5, 5);
+		gbc_chckbxActive.gridx = 1;
+		gbc_chckbxActive.gridy = 0;
+		panelCommon.add(chckbxActive, gbc_chckbxActive);
 		
 		JLabel lblNextRecertificationDate = new JLabel("Next re-certification date:");
-		lblNextRecertificationDate.setBounds(10, 37, 233, 14);
-		panelCommon.add(lblNextRecertificationDate);
+		GridBagConstraints gbc_lblNextRecertificationDate = new GridBagConstraints();
+		gbc_lblNextRecertificationDate.anchor = GridBagConstraints.NORTH;
+		gbc_lblNextRecertificationDate.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblNextRecertificationDate.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNextRecertificationDate.gridx = 1;
+		gbc_lblNextRecertificationDate.gridy = 1;
+		panelCommon.add(lblNextRecertificationDate, gbc_lblNextRecertificationDate);
+		JDatePickerImpl dpDate = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+		dpDate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				isModified = true;
+			}
+		});
+		
+		
+		
+				
+		GridBagConstraints gbc_dpDate = new GridBagConstraints();
+		gbc_dpDate.anchor = GridBagConstraints.SOUTH;
+		gbc_dpDate.fill = GridBagConstraints.HORIZONTAL;
+		gbc_dpDate.insets = new Insets(0, 0, 5, 5);
+		gbc_dpDate.gridx = 2;
+		gbc_dpDate.gridy = 1;
+		panelCommon.add(dpDate, gbc_dpDate);
 		
 
 		
 		
 		JLabel lblIntervalBetweenRecertifications = new JLabel("Interval between re-certifications (in months):");
-		lblIntervalBetweenRecertifications.setBounds(10, 65, 233, 14);
-		panelCommon.add(lblIntervalBetweenRecertifications);
+		GridBagConstraints gbc_lblIntervalBetweenRecertifications = new GridBagConstraints();
+		gbc_lblIntervalBetweenRecertifications.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblIntervalBetweenRecertifications.insets = new Insets(0, 0, 5, 5);
+		gbc_lblIntervalBetweenRecertifications.gridx = 1;
+		gbc_lblIntervalBetweenRecertifications.gridy = 2;
+		panelCommon.add(lblIntervalBetweenRecertifications, gbc_lblIntervalBetweenRecertifications);
+		
+		spInterval = new JSpinner();
+		spInterval.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				isModified = true;
+			}
+		});
+		spInterval.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(1)));
+		GridBagConstraints gbc_spInterval = new GridBagConstraints();
+		gbc_spInterval.insets = new Insets(0, 0, 5, 5);
+		gbc_spInterval.anchor = GridBagConstraints.NORTHWEST;
+		gbc_spInterval.gridx = 2;
+		gbc_spInterval.gridy = 2;
+		panelCommon.add(spInterval, gbc_spInterval);
+		
+		JLabel lblNotes = new JLabel("Notes");
+		GridBagConstraints gbc_lblNotes = new GridBagConstraints();
+		gbc_lblNotes.anchor = GridBagConstraints.WEST;
+		gbc_lblNotes.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNotes.gridx = 1;
+		gbc_lblNotes.gridy = 3;
+		panelCommon.add(lblNotes, gbc_lblNotes);
+		
+		taNotes = new JTextArea();
+		GridBagConstraints gbc_taNotes = new GridBagConstraints();
+		gbc_taNotes.gridwidth = 3;
+		gbc_taNotes.fill = GridBagConstraints.BOTH;
+		gbc_taNotes.gridx = 1;
+		gbc_taNotes.gridy = 4;
+		panelCommon.add(taNotes, gbc_taNotes);
+		
+		taNotes.getDocument().addDocumentListener(documentListener);
 		
 		
-		UtilDateModel model = new UtilDateModel();
-		Properties p = new Properties();
-		p.put("text.today", "Today");
-		p.put("text.month", "Month");
-		p.put("text.year", "Year");
-		JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
-		JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
-		datePicker.setBounds(253, 28, 164, 23);
-		
-				
-		panelCommon.add(datePicker);
-		
-		JSpinner spinner = new JSpinner();
-		spinner.setModel(new SpinnerNumberModel(new Integer(0), new Integer(0), null, new Integer(1)));
-		spinner.setBounds(253, 62, 47, 20);
-		panelCommon.add(spinner);
-		
-		JCheckBox chckbxActive = new JCheckBox("Active");
-		chckbxActive.setSelected(true);
-		chckbxActive.setBounds(6, 7, 97, 23);
-		panelCommon.add(chckbxActive);
 		
 		JPanel panelApprovers = new JPanel();
 		tabbedPane.addTab("Approvers", null, panelApprovers, null);
@@ -240,6 +362,8 @@ public class ApplicationDlg extends JDialog {
 		panel.add(lblSqlServer, gbc_lblSqlServer);
 		
 		tfServer = new JTextField();
+		tfServer.getDocument().addDocumentListener(documentListener);
+		
 		GridBagConstraints gbc_tfServer = new GridBagConstraints();
 		gbc_tfServer.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tfServer.anchor = GridBagConstraints.NORTH;
@@ -258,6 +382,8 @@ public class ApplicationDlg extends JDialog {
 		panel.add(lblUser, gbc_lblUser);
 		
 		tfUser = new JTextField();
+		tfUser.getDocument().addDocumentListener(documentListener);
+		
 		GridBagConstraints gbc_tfUser = new GridBagConstraints();
 		gbc_tfUser.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tfUser.anchor = GridBagConstraints.NORTH;
@@ -276,6 +402,8 @@ public class ApplicationDlg extends JDialog {
 		panel.add(lblDatabase, gbc_lblDatabase);
 		
 		tfDatabase = new JTextField();
+		tfDatabase.getDocument().addDocumentListener(documentListener);
+		
 		GridBagConstraints gbc_tfDatabase = new GridBagConstraints();
 		gbc_tfDatabase.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tfDatabase.anchor = GridBagConstraints.NORTH;
@@ -294,6 +422,8 @@ public class ApplicationDlg extends JDialog {
 		panel.add(lblPassword, gbc_lblPassword);
 		
 		pfPassword = new JPasswordField();
+		pfPassword.getDocument().addDocumentListener(documentListener);
+		
 		GridBagConstraints gbc_pfPassword = new GridBagConstraints();
 		gbc_pfPassword.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pfPassword.anchor = GridBagConstraints.NORTH;
@@ -318,7 +448,8 @@ public class ApplicationDlg extends JDialog {
 		gbc_lblSqlStatement.gridy = 4;
 		panel.add(lblSqlStatement, gbc_lblSqlStatement);
 		
-		final JTextArea taStatement = new JTextArea();
+		taStatement = new JTextArea();
+		taStatement.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		GridBagConstraints gbc_taStatement = new GridBagConstraints();
 		gbc_taStatement.gridwidth = 5;
 		gbc_taStatement.insets = new Insets(0, 0, 5, 5);
@@ -326,6 +457,9 @@ public class ApplicationDlg extends JDialog {
 		gbc_taStatement.gridx = 1;
 		gbc_taStatement.gridy = 5;
 		panel.add(taStatement, gbc_taStatement);
+		
+		taStatement.getDocument().addDocumentListener(documentListener);
+		
 		
 		JButton btnNewButton = new JButton("Test statement");
 		btnNewButton.addActionListener(new ActionListener() {
@@ -373,6 +507,15 @@ public class ApplicationDlg extends JDialog {
 				buttonPane.add(cancelButton);
 			}
 		}
+		
+		// initialization
+		fillFormData((Applications)cbApplication.getSelectedItem());
+		
+		
+		currentApp = (Applications)cbApplication.getSelectedItem();
+		
+		
+		
 	}
 	
 	private void testConnection(String server, String database) {
@@ -416,6 +559,40 @@ public class ApplicationDlg extends JDialog {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private void fillFormData(Applications app) {
+		if (app != null) {
+			dateModel.setValue(app.getDate());
+			spInterval.setValue(app.getInterval());
+			taNotes.setText(app.getNotes());
+			
+			tfServer.setText(app.getServer());
+			tfDatabase.setText(app.getDatabaseName());
+			tfUser.setText(app.getUserName());
+			pfPassword.setText(app.getPassword());
+			taStatement.setText(app.getStatement());
+			
+			isModified = false;
+			
+		}
+	}
+	
+	private void saveChanges() {
+		if (isModified) {
+			currentApp.setDate(dateModel.getValue());
+			currentApp.setInterval((Integer)spInterval.getValue());
+			currentApp.setNotes(taNotes.getText());
+			currentApp.setServer(tfServer.getText());
+			currentApp.setDatabaseName(tfDatabase.getText());
+			currentApp.setPassword(pfPassword.getPassword().toString());
+			currentApp.setStatement(taStatement.getText());
+
+			HibernateUtil.saveElement(currentApp);
+			
+			isModified = false;
+			
 		}
 	}
 }

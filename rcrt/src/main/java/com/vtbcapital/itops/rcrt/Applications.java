@@ -43,6 +43,25 @@ public class Applications {
 	private
 	String notes;
 	
+	@Column(name="Server")
+	private
+	String server;
+	
+	@Column(name="DatabaseName")
+	private 
+	String databaseName;
+	
+	@Column(name="UserName")
+	private 
+	String userName;
+	
+	@Column(name="Password")
+	private
+	String password;
+	
+	@Column(name="Statement")
+	private String statement; 
+	
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "application")
 	private Set<Approvers> approvers = new HashSet<Approvers>(0);
@@ -112,6 +131,46 @@ public class Applications {
 
 		return result;
 		
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
+	public String getDatabaseName() {
+		return databaseName;
+	}
+
+	public void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getStatement() {
+		return statement;
+	}
+
+	public void setStatement(String statement) {
+		this.statement = statement;
 	}
 	
 	
