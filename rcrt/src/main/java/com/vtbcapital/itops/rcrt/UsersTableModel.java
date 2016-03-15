@@ -62,6 +62,15 @@ public class UsersTableModel extends AbstractTableModel {
 		else return null;
 	}
 	
+	public int index(Users user) {
+		for (int i = 0; i < UsersList.size(); i++) {
+			if (UsersList.get(i).equals(user)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 	private void reloadData() {
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		
@@ -70,6 +79,16 @@ public class UsersTableModel extends AbstractTableModel {
 		UsersList = new ArrayList<Users>(q.list());
 		
 		session.close();		
+	}
+	
+	public Users findByEMail(String email) {
+		for(Users u : UsersList) {
+			if (u.getEmail().equalsIgnoreCase(email.toLowerCase())) {
+				return u;
+			}
+		}
+		
+		return null;
 	}
 	
 	public void add(Users user) {

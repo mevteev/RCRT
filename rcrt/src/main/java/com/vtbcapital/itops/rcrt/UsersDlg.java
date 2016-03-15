@@ -38,6 +38,10 @@ public class UsersDlg extends JDialog {
 	 * Create the dialog.
 	 */
 	public UsersDlg(Users user) {
+		this(user, null, null);
+	}
+	
+	public UsersDlg(Users user, String strUserName, String strEMail) {
 		result = user;
 		
 		setTitle("User");
@@ -111,6 +115,13 @@ public class UsersDlg extends JDialog {
 			tfName.setText(user.getName());
 			tfEMail.setText(user.getEmail());
 			tfDomain.setText(user.getDomainAccount());
+		} else {
+			if (strUserName != null) {
+				tfName.setText(strUserName);
+			}
+			if (strEMail != null) {
+				tfEMail.setText(strEMail);
+			}
 		}
 	}
 	

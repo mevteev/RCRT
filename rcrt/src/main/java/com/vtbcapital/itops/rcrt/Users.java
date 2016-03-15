@@ -74,6 +74,18 @@ public class Users {
 		return getName();
 	}
 	
+	public boolean equals(Object that) {
+		if (this == that)
+			return true;
+		if (that == null)
+			return false;
+		if (!(that instanceof Users))
+			return false;
+		return ((Users) that).getEmail().equals(this.getEmail()) && ((Users) that).getName().equals(this.getName());
+	}
+	
+	
+	
 	
 
 }

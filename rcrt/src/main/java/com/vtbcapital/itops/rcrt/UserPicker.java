@@ -7,6 +7,8 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
@@ -35,7 +37,13 @@ public class UserPicker extends JDialog {
 	private UsersTableModel model;
 	private TableRowSorter<UsersTableModel> sorter;
 	
-	private Users result;
+	private JButton okButton;
+	
+	public Users result;
+	
+	//pass this params to form if 'add new' pressed these values will appear in form
+	public String strUserName = null;
+	public String strEMail = null;
 
 	/**
 	 * Launch the application.
@@ -53,10 +61,14 @@ public class UserPicker extends JDialog {
 		}
 	}
 
+	
+	public UserPicker() {
+		this(null);
+	}
 	/**
 	 * Create the dialog.
 	 */
-	public UserPicker() {
+	public UserPicker(Users user) {
 		setTitle("Select user:");
 		setBounds(100, 100, 516, 475);
 		getContentPane().setLayout(new BorderLayout());
@@ -107,7 +119,7 @@ public class UserPicker extends JDialog {
 			JButton btnAddNew = new JButton("Add new");
 			btnAddNew.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					UsersDlg ud = new UsersDlg(null);
+					UsersDlg ud = new UsersDlg(null, strUserName, strEMail);
 					Users newUser = ud.showDialog();
 					if (newUser != null) {
 						addNewUser(newUser);
@@ -159,8 +171,27 @@ public class UserPicker extends JDialog {
 		table = new JTable(model);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
+
+		ListSelectionModel tableSelectionModel = table.getSelectionModel();
+		tableSelectionModel.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				result = ((UsersTableModel)table.getModel()).get(table.convertRowIndexToModel(table.getSelectedRow()));
+			}
+		});
+		
 		sorter = new TableRowSorter<UsersTableModel>(model);
 		table.setRowSorter(sorter);
+		
+		if (user != null) {
+			int index = model.index(user);
+			if (index >= 0) {
+				table.setRowSelectionInterval(sorter.convertRowIndexToView(index), sorter.convertRowIndexToView(index));
+				
+			}
+		}
+		
 		
 		TableColumn column = null;
 		for (int i = 0; i < model.getColumnCount(); i++) {
@@ -180,7 +211,7 @@ public class UserPicker extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				okButton = new JButton("OK");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						result = ((UsersTableModel)table.getModel()).get(table.convertRowIndexToModel(table.getSelectedRow()));
@@ -205,6 +236,9 @@ public class UserPicker extends JDialog {
 			}
 		}
 	}
+	
+	
+
 	
 	private void newFilter() {
 		RowFilter<UsersTableModel, Object> rf = null;
@@ -238,5 +272,9 @@ public class UserPicker extends JDialog {
 		setModal(true);
 		setVisible(true);
 		return result;
+	}
+	
+	public void addConfirmListener(ActionListener listener) {
+		okButton.addActionListener(listener);
 	}
 }

@@ -1,8 +1,14 @@
 package com.vtbcapital.itops.rcrt;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -12,6 +18,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+
+
+
+
+
+
 
 
 import org.hibernate.Query;
@@ -171,6 +183,44 @@ public class Applications {
 
 	public void setStatement(String statement) {
 		this.statement = statement;
+	}
+	
+	
+	public List<RecertificationDetail> getUsersList() {
+		List<RecertificationDetail> ll = new LinkedList<RecertificationDetail>();
+		
+		Connection conn;
+		String url = "jdbc:sqlserver://" + getServer() + ";databaseName=" + getDatabaseName() + ";integratedSecurity=true";
+		try {
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			conn = DriverManager.getConnection(url);
+			System.out.println("connected");
+			
+			Statement statement = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			ResultSet rs = statement.executeQuery(getStatement());
+			
+			
+			while(rs.next()) {
+				String login = rs.getString("Login");
+				String userName = rs.getString("UserName");
+				String email = rs.getString("EMail");
+				
+				RecertificationDetail rd = new RecertificationDetail();
+				rd.setLogin(login);
+				rd.setUserName(userName);
+				rd.setEmail(email);
+				
+				ll.add(rd);
+			}
+			
+			conn.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return ll;
+		
 	}
 	
 	
