@@ -54,5 +54,17 @@ public class HibernateUtil {
         
         return true;
     }
+    
+    public static boolean saveElement(String className, Object object) {
+		Session session = getSessionFactory().openSession();
+		  
+        session.beginTransaction();
+ 
+        session.saveOrUpdate(className, object);
+ 
+        session.getTransaction().commit(); 
+        
+        return true;
+    }
 
 }

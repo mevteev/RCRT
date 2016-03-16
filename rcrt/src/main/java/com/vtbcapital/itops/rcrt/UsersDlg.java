@@ -36,6 +36,7 @@ public class UsersDlg extends JDialog {
 
 	/**
 	 * Create the dialog.
+	 * @wbp.parser.constructor
 	 */
 	public UsersDlg(Users user) {
 		this(user, null, null);

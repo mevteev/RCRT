@@ -77,6 +77,9 @@ public class Applications {
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "application")
 	private Set<Approvers> approvers = new HashSet<Approvers>(0);
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "application")
+	private Set<Recertifications> recertifications = new HashSet<Recertifications>(0);	
 
 	public int getId() {
 		return id;

@@ -12,5 +12,7 @@
         <mapping class="com.vtbcapital.itops.rcrt.Applications"/>
         <mapping class="com.vtbcapital.itops.rcrt.Users"/>
         <mapping class="com.vtbcapital.itops.rcrt.Approvers"/>
+        <mapping class="com.vtbcapital.itops.rcrt.Recertifications"/>
+        <mapping class="com.vtbcapital.itops.rcrt.RecertificationDetail"/>
     </session-factory>
 </hibernate-configuration>

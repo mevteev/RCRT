@@ -5,11 +5,14 @@ import java.awt.FlowLayout;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 
 import java.awt.CardLayout;
 
@@ -29,13 +32,22 @@ import javax.swing.event.TableModelListener;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JScrollPane;
 
+import org.hibernate.exception.spi.ConversionContext;
+
+import javax.swing.JTextField;
+import javax.swing.JFormattedTextField;
+
 public class RecertificationProcessDlg extends JDialog implements TableModelListener {
 
+	
 	private final JPanel contentPanelWizard = new JPanel();
 	private JTable table_users;
 	private JTable tableDetails;
@@ -63,9 +75,16 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 	private JScrollPane scrollPane;
 	private JScrollPane scrollPane_1;
 	
-	private String[] titles;
+	private String[] titles = new String[] {"Select application", "Reading user list from database", 
+			 "Match users", "Set line managers", "Review and confirm"};
 	
 	private RecertificationDetailTableModel rdModel;
+	private JLabel lblApplication;
+	private JTextField tfApplication;
+	private JLabel lblRecertificationDate;
+	private JFormattedTextField tfRecertificationDate;
+	private JTable tableConfirm;
+	private JScrollPane scrollPane_2;
 
 	/**
 	 * Launch the application.
@@ -193,7 +212,21 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 				gbc_scrollPane_1.gridy = 0;
 				panelLineManagers.add(scrollPane_1, gbc_scrollPane_1);
 				{
-					tableDetails = new JTable();
+					tableDetails = new JTable() {
+						public TableCellEditor getCellEditor(int row, int column) {
+							int modelColumn = convertColumnIndexToModel(column);
+							if (modelColumn != rdModel.TABLE_DETAILS_COLUMN_LINE_MANAGER) {
+								return super.getCellEditor(row, column);
+							} else {
+								int index = convertRowIndexToModel(row);
+								RecertificationDetail rdCurr = rdModel.getRdList().get(index);
+								//JComboBox<Users> cb = new JComboBox<Users>(rdCurr.getProposedLineManagers().toArray());
+								
+								return new ProposedManagerComboBoxEditor(rdCurr.getProposedLineManagers());
+							}
+						}
+						
+					};
 					scrollPane_1.setViewportView(tableDetails);
 					
 					//tableDetails.setDefaultEditor(Users.class,
@@ -206,9 +239,81 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 		{
 			panelConfirm = new JPanel();
 			contentPanelWizard.add(panelConfirm, "name_202922565411318");
+			GridBagLayout gbl_panelConfirm = new GridBagLayout();
+			gbl_panelConfirm.columnWidths = new int[]{157, 69, 0};
+			gbl_panelConfirm.rowHeights = new int[]{23, 0, 0, 0, 0};
+			gbl_panelConfirm.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+			gbl_panelConfirm.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+			panelConfirm.setLayout(gbl_panelConfirm);
+			{
+				lblApplication = new JLabel("Application:");
+				GridBagConstraints gbc_lblApplication = new GridBagConstraints();
+				gbc_lblApplication.anchor = GridBagConstraints.WEST;
+				gbc_lblApplication.insets = new Insets(0, 0, 5, 5);
+				gbc_lblApplication.gridx = 0;
+				gbc_lblApplication.gridy = 0;
+				panelConfirm.add(lblApplication, gbc_lblApplication);
+			}
+			{
+				tfApplication = new JTextField();
+				tfApplication.setEditable(false);
+				GridBagConstraints gbc_tfApplication = new GridBagConstraints();
+				gbc_tfApplication.insets = new Insets(0, 0, 5, 0);
+				gbc_tfApplication.fill = GridBagConstraints.HORIZONTAL;
+				gbc_tfApplication.gridx = 1;
+				gbc_tfApplication.gridy = 0;
+				panelConfirm.add(tfApplication, gbc_tfApplication);
+				tfApplication.setColumns(10);
+			}
+			{
+				lblRecertificationDate = new JLabel("Recertification date:");
+				GridBagConstraints gbc_lblRecertificationDate = new GridBagConstraints();
+				gbc_lblRecertificationDate.anchor = GridBagConstraints.WEST;
+				gbc_lblRecertificationDate.insets = new Insets(0, 0, 5, 5);
+				gbc_lblRecertificationDate.gridx = 0;
+				gbc_lblRecertificationDate.gridy = 1;
+				panelConfirm.add(lblRecertificationDate, gbc_lblRecertificationDate);
+			}
+			{
+				DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+				format.setLenient(false);
+
+				tfRecertificationDate = new JFormattedTextField(format);
+				tfRecertificationDate.setColumns(10);
+				GridBagConstraints gbc_formattedTextField = new GridBagConstraints();
+				gbc_formattedTextField.insets = new Insets(0, 0, 5, 0);
+				gbc_formattedTextField.fill = GridBagConstraints.HORIZONTAL;
+				gbc_formattedTextField.gridx = 1;
+				gbc_formattedTextField.gridy = 1;
+				panelConfirm.add(tfRecertificationDate, gbc_formattedTextField);
+			}
+			{
+				scrollPane_2 = new JScrollPane();
+				GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
+				gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
+				gbc_scrollPane_2.gridwidth = 2;
+				gbc_scrollPane_2.insets = new Insets(0, 0, 5, 0);
+				gbc_scrollPane_2.gridx = 0;
+				gbc_scrollPane_2.gridy = 2;
+				panelConfirm.add(scrollPane_2, gbc_scrollPane_2);
+				{
+					tableConfirm = new JTable();
+					scrollPane_2.setViewportView(tableConfirm);
+				}
+			}
 			{
 				JButton btnConfirm = new JButton("Confirm");
-				panelConfirm.add(btnConfirm);
+				btnConfirm.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						startRecertification();
+					}
+				});
+				GridBagConstraints gbc_btnConfirm = new GridBagConstraints();
+				gbc_btnConfirm.insets = new Insets(0, 0, 0, 5);
+				gbc_btnConfirm.anchor = GridBagConstraints.NORTHWEST;
+				gbc_btnConfirm.gridx = 0;
+				gbc_btnConfirm.gridy = 3;
+				panelConfirm.add(btnConfirm, gbc_btnConfirm);
 			}
 		}
 		{
@@ -247,8 +352,6 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 		 wizard = new JPanel[] { panelSelectApplication,panelReadUsersList,
 				 panelMatchUsers, panelLineManagers, panelConfirm};
 		 
-		 titles = new String[] {"Select application", "Reading user list from database", 
-				 "Match users", "Set line managers", "Confirm"};
 		 
 		 
 		
@@ -266,11 +369,8 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 			case 1:
 				rdModel = new RecertificationDetailTableModel(lstRd, true);
 				table_users.setModel(rdModel);
-
-				table_users.getColumnModel().getColumn(3).setCellEditor(new UsersCellEditor(table_users.getDefaultEditor(Users.class)));
-				
+				table_users.getColumnModel().getColumn(rdModel.TABLE_USERS_COLUMN_USER).setCellEditor(new UsersCellEditor(table_users.getDefaultEditor(Users.class)));
 				table_users.getModel().addTableModelListener(this);
-				
 				TableColumnModel tcm = table_users.getColumnModel();
 				tcm.removeColumn(tcm.getColumn(5));
 				tcm.removeColumn(tcm.getColumn(4));
@@ -278,13 +378,17 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 				
 			case 2:
 				//RecertificationDetailTableModel rdModel = new RecertificationDetailTableModel(lstRd, true);
+				rdModel.proposeLineManagers();
 				tableDetails.setModel(rdModel);
-
-				//tableDetails.getColumnModel().getColumn(3).setCellRenderer(new UsersCellRenderer(tableDetails));
+				rdModel.addTableModelListener(this);
 				tableDetails.getColumnModel().getColumn(3).setCellEditor(new UsersCellEditor(tableDetails.getDefaultEditor(Users.class)));
+				break;
+			case 3:
+				Date date = new Date();
+				tfRecertificationDate.setValue(date);
+				tfApplication.setText(selectedApp.getName());
 				
-				
-
+				tableConfirm.setModel(rdModel);
 				break;
 		}
 		
@@ -328,13 +432,32 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 		return ll;
 	}
 
+	
+	private void startRecertification() {
+		Recertifications r = new Recertifications();
+		r.setApplication(selectedApp);
+		r.setStartDate((Date)tfRecertificationDate.getValue());
+		
+		HibernateUtil.saveElement(r);
+		
+		rdModel.save(r);
+		
+		System.out.println("Saved");
+	}
+	
 	@Override
 	public void tableChanged(TableModelEvent e) {
-		if (currentPage == 2) {	// Matching users
+		switch (currentPage) {
+		case 2:
 			btNext.setEnabled(rdModel.isAllUsersMatched());
+			break;
+		case 3:
+			btNext.setEnabled(rdModel.isAllLineManagersSet());
+			break;
 		}
 		
 	}
+
 	
 
 

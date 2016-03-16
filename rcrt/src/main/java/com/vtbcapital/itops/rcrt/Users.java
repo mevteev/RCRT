@@ -29,6 +29,17 @@ public class Users {
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
 	private Set<Approvers> approvers = new HashSet<Approvers>(0);
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+	private Set<Recertifications> recertifications = new HashSet<Recertifications>(0);
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+	private Set<RecertificationDetail> recertificationDetail = new HashSet<RecertificationDetail>(0);
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "lineManager")
+	private Set<RecertificationDetail> recertificationDetailLM = new HashSet<RecertificationDetail>(0);
+
+	
 
 	public int getId() {
 		return id;
@@ -68,6 +79,17 @@ public class Users {
 
 	public void setApprovers(Set<Approvers> approvers) {
 		this.approvers = approvers;
+	}
+	
+	
+	public Users() {
+		
+	}
+	
+	public Users(String userName, String email, String domain) {
+		this.setName(userName);
+		this.setEmail(email);
+		this.setDomainAccount(domain);
 	}
 
 	public String toString() {

@@ -83,13 +83,22 @@ public class UsersTableModel extends AbstractTableModel {
 	
 	public Users findByEMail(String email) {
 		for(Users u : UsersList) {
-			if (u.getEmail().equalsIgnoreCase(email.toLowerCase())) {
+			if (u.getEmail().equalsIgnoreCase(email)) {
 				return u;
 			}
 		}
-		
 		return null;
 	}
+	
+	public Users findByName(String name) {
+		for(Users u : UsersList) {
+			if (u.getName().equalsIgnoreCase(name)) {
+				return u;
+			}
+		}
+		return null;
+	}
+
 	
 	public void add(Users user) {
 		HibernateUtil.saveElement(user);	
