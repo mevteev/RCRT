@@ -1,6 +1,9 @@
 package com.vtbcapital.itops.rcrt;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -106,8 +109,47 @@ public class Users {
 		return ((Users) that).getEmail().equals(this.getEmail()) && ((Users) that).getName().equals(this.getName());
 	}
 	
+	public List<Users> getPreviousLineManagers(Applications app) {
+		/*
+		select u.name,m.name, r.startdate, a.name from [RCRT].Users u
+		 inner join [RCRT].RecertificationDetails rd on rd.id_user = u.id
+		 inner join [RCRT].Users m on rd.id_manager = m.id
+		 inner join [RCRT].Recertifications r on rd.id_recertification = r.id
+		 inner join [RCRT].Applications a on r.id_application = a.id
+		 */
+		String sqlQuery = "select u, rd.lineManager, r.startDate, a.name from Users u " + 
+				"inner join u.recertificationDetail rd " +
+				"inner join rd.recertification r " +
+				"inner join r.application a " +
+				"where u.id = " + this.getId() +
+				"and a.id = " + app.getId() + 
+				"order by r.startDate desc";
+		
+		
+		/*+
+				 "inner join u.recertificationDetail.lineManager m  " +
+				 "inner join u.recertificationDetail.recertification " +
+				 "inner join u.recertificationDetail.recertification.application " +
+				 "where a.id = " + app.getId() +
+				 "and u.id = " + this.getId();*/
+		
+		
+		List<Object[]> res = HibernateUtil.select(sqlQuery);
+		List<Users> approvers = new ArrayList<Users>();
+		
+		for (Object[] arr : res) {
+			approvers.add((Users)arr[1]);
+		}
+		
+		return approvers;
+	}
 	
-	
-	
-
+	public Users getPreviousLineManager(Applications app) {
+		List<Users> approvers = getPreviousLineManagers(app);
+		if (!approvers.isEmpty()) {
+			return approvers.get(0);
+		} else {
+			return null;
+		}
+	}
 }

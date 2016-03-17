@@ -103,6 +103,7 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 	 * Create the dialog.
 	 */
 	public RecertificationProcessDlg() {
+		
 		setBounds(100, 100, 565, 401);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanelWizard.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -358,6 +359,8 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 		currentPage = 0;
 		currentPanel = wizard[currentPage];
 		this.setTitle(titles[currentPage]);
+		
+		
 	}
 	
 	
@@ -378,6 +381,7 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 				
 			case 2:
 				//RecertificationDetailTableModel rdModel = new RecertificationDetailTableModel(lstRd, true);
+				rdModel.fillPreviousLineManagers(selectedApp);
 				rdModel.proposeLineManagers();
 				tableDetails.setModel(rdModel);
 				rdModel.addTableModelListener(this);

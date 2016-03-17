@@ -26,6 +26,8 @@ import javax.persistence.OneToMany;
 
 
 
+import javax.transaction.Transactional;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -78,7 +80,7 @@ public class Applications {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "application")
 	private Set<Approvers> approvers = new HashSet<Approvers>(0);
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "application")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "application")
 	private Set<Recertifications> recertifications = new HashSet<Recertifications>(0);	
 
 	public int getId() {
@@ -224,6 +226,15 @@ public class Applications {
 		
 		return ll;
 		
+	}
+
+	
+	public Set<Recertifications> getRecertifications() {
+		return recertifications;
+	}
+
+	public void setRecertifications(Set<Recertifications> recertifications) {
+		this.recertifications = recertifications;
 	}
 	
 	
