@@ -20,10 +20,15 @@ public class RecertificationDetailTableModel extends AbstractTableModel {
 	
 	private List<RecertificationDetail> rdList;
 	
-	private String[] columnNames = new String[] {"Login", "UserName", "EMail", "User", "LineManager", "PrevLineManager"};
-
-	public RecertificationDetailTableModel(List<RecertificationDetail> rdList, boolean mapByMail) {
+	private String[] columnNames = new String[] {"Login", "UserName", "EMail", "User", "LineManager", "PrevLineManager", 
+			"Field1", "Field2", "Field3", "Field4", "Field5"};
+	
+	private Applications app;
+	
+	public RecertificationDetailTableModel(List<RecertificationDetail> rdList, Applications app, boolean mapByMail) {
 		this.setRdList(rdList);
+		this.setApp(app);
+		
 		if (mapByMail) {
 			mapByEmail();
 		}
@@ -43,24 +48,31 @@ public class RecertificationDetailTableModel extends AbstractTableModel {
 	
 	@Override
 	public String getColumnName(int column) {
-		return columnNames[column];
+		if (column < 6) {
+			return columnNames[column];
+		}
+		
+		return getApp().getField(column - 6);
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		RecertificationDetail rd = getRdList().get(rowIndex);
 		Object[] values = new Object[] {rd.getLogin(), rd.getUserName(), rd.getEmail(), rd.getUser(),
-				rd.getLineManager(), rd.getPrevLineManager()};
+				rd.getLineManager(), rd.getPrevLineManager(), 
+				rd.getField1(), rd.getField2(), rd.getField3(), rd.getField4(), rd.getField5()};
 		return values[columnIndex];
 	}
 	
 	public Class getColumnClass(int c) {
-        Class[] values = new Class[] {String.class, String.class, String.class, Users.class, Users.class, Users.class};
+        Class[] values = new Class[] {String.class, String.class, String.class, Users.class, Users.class, Users.class,
+        		String.class, String.class, String.class, String.class, String.class};
         return values[c];
     }
 	
 	public boolean isCellEditable(int row, int col) {
-		boolean[] values = new boolean[] {false, false, false, true, true, false};
+		boolean[] values = new boolean[] {false, false, false, true, true, false, 
+				false, false, false, false, false};
 		return values[col];
 	}
 	
@@ -195,6 +207,14 @@ public class RecertificationDetailTableModel extends AbstractTableModel {
 			
 			HibernateUtil.saveElement(rd);
 		}
+	}
+
+	public Applications getApp() {
+		return app;
+	}
+
+	public void setApp(Applications app) {
+		this.app = app;
 	}
 
 }

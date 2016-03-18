@@ -26,6 +26,7 @@ import javax.persistence.OneToMany;
 
 
 
+import javax.swing.JOptionPane;
 import javax.transaction.Transactional;
 
 import org.hibernate.Query;
@@ -35,6 +36,8 @@ import org.hibernate.Session;
 
 @Entity(name="Applications")
 public class Applications {
+	
+	final static int numberAdditionalFields = 5;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -75,6 +78,22 @@ public class Applications {
 	
 	@Column(name="Statement")
 	private String statement; 
+	
+	@Column(name="Field1")
+	private String field1;
+	
+	@Column(name="Field2")
+	private String field2;
+	
+	@Column(name="Field3")
+	private String field3;
+	
+	@Column(name="Field4")
+	private String field4;
+	
+	@Column(name="Field5")
+	private String field5;
+	
 	
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "application")
@@ -210,10 +229,19 @@ public class Applications {
 				String userName = rs.getString("UserName");
 				String email = rs.getString("EMail");
 				
+				
 				RecertificationDetail rd = new RecertificationDetail();
 				rd.setLogin(login);
 				rd.setUserName(userName);
 				rd.setEmail(email);
+				
+				for (int i = 0; i < numberAdditionalFields; i++) {
+					if (!this.getField(i).trim().isEmpty()) {
+						String fld = rs.getString("Field" + (i+1));
+						rd.setField(i, fld);
+					}
+				}
+				
 				
 				ll.add(rd);
 			}
@@ -221,6 +249,7 @@ public class Applications {
 			conn.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
 		
@@ -235,6 +264,57 @@ public class Applications {
 
 	public void setRecertifications(Set<Recertifications> recertifications) {
 		this.recertifications = recertifications;
+	}
+
+	public String getField1() {
+		return field1;
+	}
+
+	public void setField1(String field1) {
+		this.field1 = field1;
+	}
+
+	public String getField2() {
+		return field2;
+	}
+
+	public void setField2(String field2) {
+		this.field2 = field2;
+	}
+
+	public String getField3() {
+		return field3;
+	}
+
+	public void setField3(String field3) {
+		this.field3 = field3;
+	}
+
+	public String getField4() {
+		return field4;
+	}
+
+	public void setField4(String field4) {
+		this.field4 = field4;
+	}
+
+	public String getField5() {
+		return field5;
+	}
+
+	public void setField5(String field5) {
+		this.field5 = field5;
+	}
+	
+	public String getField(int index) {
+		switch (index) {
+			case 0: return getField1();
+			case 1: return getField2();
+			case 2: return getField3();
+			case 3: return getField4();
+			case 4: return getField5();
+			default: return "";
+		}
 	}
 	
 	

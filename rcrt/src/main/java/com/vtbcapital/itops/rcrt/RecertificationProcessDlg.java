@@ -365,18 +365,24 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 	
 	
 	private void nextButtonPress() {
+		TableColumnModel tcm;
 		switch (currentPage) {
 			case 0:
 				selectedApp = (Applications)listApplication.getSelectedValue();
 				break;
 			case 1:
-				rdModel = new RecertificationDetailTableModel(lstRd, true);
+				rdModel = new RecertificationDetailTableModel(lstRd, selectedApp, true);
 				table_users.setModel(rdModel);
 				table_users.getColumnModel().getColumn(rdModel.TABLE_USERS_COLUMN_USER).setCellEditor(new UsersCellEditor(table_users.getDefaultEditor(Users.class)));
 				table_users.getModel().addTableModelListener(this);
-				TableColumnModel tcm = table_users.getColumnModel();
+				tcm = table_users.getColumnModel();
 				tcm.removeColumn(tcm.getColumn(5));
 				tcm.removeColumn(tcm.getColumn(4));
+				for (int i = Applications.numberAdditionalFields - 1 ; i >= 0 ; i--) {
+					if (selectedApp.getField(i).isEmpty()) {
+						tcm.removeColumn(tcm.getColumn(4 + i));
+					}
+				}
 				break;
 				
 			case 2:
@@ -385,7 +391,15 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 				rdModel.proposeLineManagers();
 				tableDetails.setModel(rdModel);
 				rdModel.addTableModelListener(this);
-				tableDetails.getColumnModel().getColumn(3).setCellEditor(new UsersCellEditor(tableDetails.getDefaultEditor(Users.class)));
+				//tableDetails.getColumnModel().getColumn(3).setCellEditor(new UsersCellEditor(tableDetails.getDefaultEditor(Users.class)));
+				
+				tcm = tableDetails.getColumnModel();
+				tcm.removeColumn(tcm.getColumn(10));
+				tcm.removeColumn(tcm.getColumn(9));
+				tcm.removeColumn(tcm.getColumn(8));
+				tcm.removeColumn(tcm.getColumn(7));
+				tcm.removeColumn(tcm.getColumn(6));
+				
 				break;
 			case 3:
 				Date date = new Date();
@@ -393,6 +407,15 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 				tfApplication.setText(selectedApp.getName());
 				
 				tableConfirm.setModel(rdModel);
+				
+				tcm = tableConfirm.getColumnModel();
+				tcm.removeColumn(tcm.getColumn(5));
+				for (int i = Applications.numberAdditionalFields - 1 ; i >= 0 ; i--) {
+					if (selectedApp.getField(i).isEmpty()) {
+						tcm.removeColumn(tcm.getColumn(5 + i));
+					}
+				}
+				
 				break;
 		}
 		
@@ -406,7 +429,10 @@ public class RecertificationProcessDlg extends JDialog implements TableModelList
 			wizard[currentPage].setVisible(true);
 			
 			btBack.setEnabled(true);
-			btNext.setEnabled(false);
+			
+			if (currentPage == 3) btNext.setEnabled(rdModel.isAllLineManagersSet());
+			else if (currentPage == 2) btNext.setEnabled(rdModel.isAllUsersMatched());
+			else btNext.setEnabled(false);
 		}
 	}
 	

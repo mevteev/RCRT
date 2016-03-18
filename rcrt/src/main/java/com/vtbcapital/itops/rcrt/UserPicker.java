@@ -177,7 +177,11 @@ public class UserPicker extends JDialog {
 			
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				result = ((UsersTableModel)table.getModel()).get(table.convertRowIndexToModel(table.getSelectedRow()));
+				if (table.getSelectedRow() == -1) {
+					result = null;
+				} else {
+					result = ((UsersTableModel)table.getModel()).get(table.convertRowIndexToModel(table.getSelectedRow()));
+				}
 			}
 		});
 		
